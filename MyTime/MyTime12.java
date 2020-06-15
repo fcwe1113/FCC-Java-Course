@@ -1,4 +1,3 @@
-package javapractice;
 public class MyTime12 implements MyTime {
     public static final String AM = "AM";
     public static final String PM = "PM";
@@ -20,7 +19,7 @@ public class MyTime12 implements MyTime {
         return this.hour;
     }
     public void setHour(int hour) {
-        if (hour<=0 || hour>12) {
+        if (hour < 1 || hour > 11) {
             throw new IllegalArgumentException("Invalid hour "+hour);
         }
         this.hour = hour;
@@ -28,8 +27,8 @@ public class MyTime12 implements MyTime {
     public int getMinute() {
         return this.minute;
     }
-    public void setMinute(int minute) {
-        if (minute<0 || minute>=60) {
+    public void setMinute (int minute) {
+        if (minute < 0 || minute > 59) {
             throw new IllegalArgumentException("Invalid minute "+minute);
         }
         this.minute = minute;
@@ -38,72 +37,92 @@ public class MyTime12 implements MyTime {
         return this.second;
     }
     public void setSecond(int second) {
-        if (second<0 || second>=60) {
+        if (second < 0 || second > 59) {
             throw new IllegalArgumentException("Invalid second "+second);
         }
         this.second = second;
     }
-    @Override
-    public int getSecondOfDay() {
-        return hour*3600+minute*60+second;
-    }
-    @Override
-	public void addSeconds(int seconds) {
-        //get the seconds of day, and add it by the value of "seconds"
-        int sod = getSecondOfDay();
-        if(sod==12*3600&&period.equals(AM))
-            sod=0;
-        sod += seconds;
-        //if the result of sod is negative, then make it filled by 24:00:00 (aka 86400sec)
-        if(sod < 0)
-            sod = 86400 + sod;
-        
-        hour = sod / 3600;
-        minute = (sod - hour*3600) / 60;
-        second = (sod - hour*3600 - minute*60);
-        //check if this is a valid 24 hour time format
-        if (hour >= 24) {
-            hour %= 24;
-        }
-        //Check the situation that hour is in the range of (11<hour<24)
-        if (hour / 12 == 1) {
-            period = PM;
-            if (hour > 12)
-                hour -= 12;
-        } else {
-            //Check the situation that hour is less than 12 
-            period = AM;
-        }
-        //if it is 0 o'clock, then it is 12AM
-        if (hour == 0 && period.equals(this.AM)) {
-                hour = 12;
-        }
-        
-    }
-    @Override
-    public String toString() {
-        // implement
-        return String.format("%02d:%02d:%02d %s", hour,minute,second,period);
-    }
-    @Override
-    public boolean equals(Object o) {
-        // implement
-        if(this==o)
-            return true;
-        
-        if(o instanceof MyTime12){
-            MyTime12 tmp = (MyTime12) o;
-            return this.hour==tmp.getHour() && this.minute==tmp.getMinute() && this.second==tmp.getSecond();
-        }
-        
-        return false;
-    }
-
     public String getPeriod() {
         return this.period;
     }
+    
     public void setPeriod(String period){
-        this.period = period;
+        if (period.toUpperCase() != "AM" || period.toUpperCase() != "PM"){
+            throw new IllegalArgumentException("Invalid entry "+period);
+        }
+        if (period.toUpperCase() == "AM"){
+            this.period = MyTime12.AM;
+        } else {
+            this.period = MyTime12.PM;
+        }
     }
 
+    public void addSeconds(int seconds){
+        second+=seconds;
+        while (second > 59 || second < 0){
+            if (second > 59){
+                second -= 60;
+                minute++;
+            }
+            
+            if (minute > 59){
+                minute-=60;
+                hour++;
+            }
+            
+            if (hour > 12){
+                hour-=12;
+                if (period == "AM"){
+                    period = MyTime12.AM;
+                } else {
+                    period = MyTime12.PM;
+                }
+            }
+            
+            if (second < 0){
+                second+=60;
+                minute--;
+            }
+            
+            if (minute < 0){
+                minute+=60;
+                hour--;
+            }
+            
+            if (hour < 1){
+                hour+=12;
+                if (period == "AM"){
+                    period = MyTime12.AM;
+                } else {
+                    period = MyTime12.PM;
+                }
+            }
+        }
+    }
+    
+    public int getSecondOfDay(){
+        if(period == "PM"){
+            return second + minute * 60 + (hour + 12) * 3600;
+        } else {
+            return second + minute * 60 + hour * 3600;
+        }
+    }
+    
+    public String toString(){
+        return String.format("%02d:%02d:%02d %s", hour, minute, second, period);
+    }
+    
+    public boolean equals(Object o){
+        MyTime12 a = (MyTime12) o;
+        int h = a.hour;
+        int m = a.minute;
+        int s = a.second;
+        String p = a.period;
+        
+        if(h == hour && m == minute && s == second && p.equals(period)){
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

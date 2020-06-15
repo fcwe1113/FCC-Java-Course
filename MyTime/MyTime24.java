@@ -1,5 +1,3 @@
-package javapractice;
-
 public class MyTime24 implements MyTime {
     private int hour = 0;
     private int minute = 0;
@@ -44,20 +42,21 @@ public class MyTime24 implements MyTime {
     @Override
     public String toString() {
         // implement
-        return String.format("%02d:%02d:%02d",hour,minute,second);
+        return String.format("%02d:%02d:%02d", hour, minute,second);
     }
     @Override
     public boolean equals(Object o) {
         // implement
-        if(this==o)
+        MyTime24 a = (MyTime24) o;
+        int h = a.hour;
+        int m = a.minute;
+        int s = a.second;
+        
+        if (h == hour && m == minute && s == second){
             return true;
-        
-        if(o instanceof MyTime24){
-            MyTime24 tmp = (MyTime24) o;
-            return this.hour==tmp.getHour() && this.minute==tmp.getMinute() && this.second==tmp.getSecond();
+        } else {
+            return false;
         }
-        
-        return false;
     }
 
     @Override
@@ -66,24 +65,37 @@ public class MyTime24 implements MyTime {
     }
     @Override
 	public void addSeconds(int seconds) {
-        //get the seconds of day, and add it by the value of "seconds"
-        int sod = getSecondOfDay();
-        sod += seconds;
-        //if the rsult of sod is negative, then make it filled by 24:00:00 (aka 86400sec)
-        if(sod < 0)
-            sod = 86400 + sod;
-        //if the result of sod is greater than one day, then minus n * 24:00:00
-        if(sod>=86400)
-            sod %= 86400;
+        // implement
         
-        hour = sod / 3600;
-        minute = (sod - hour*3600) / 60;
-        second = (sod - hour*3600 - minute*60);
-    }
-    //Main Function
-    public static void main(String args[]) {
-    	MyTime a = new MyTime24();
-    	a.addSeconds(1231313);
-    	System.out.println(a);
+        second+=seconds;
+        while (second > 59 || second < 0){
+            if(second > 59){
+                second-=60;
+                minute++;
+            }
+        
+            if(minute > 59){
+                minute-=60;
+                hour++;
+            }
+        
+            if(hour > 23){
+                hour-=24;
+            }
+            
+            if(second < 0){
+                second+=60;
+                minute--;
+            }
+            
+            if(minute < 0){
+                minute+=60;
+                hour--;
+            }
+        
+            if(hour < 0){
+                hour+=24;
+            }
+        }
     }
 }
